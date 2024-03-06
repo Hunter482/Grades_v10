@@ -11,62 +11,127 @@ struct FachView: View {
     
     var buttoncolor: Color = .red
     @ObservedObject var storage: storageclass
+    var klassenarbeitenvorhanden: [testspeicher]
+    var hüvorhanden: [testspeicher]
+    var epovorhanden: [testspeicher]
+    
+    init(storage: storageclass) {
+        self.storage = storage
+        self.hüvorhanden = []
+        self.klassenarbeitenvorhanden = []
+        self.epovorhanden = []
+        
+        var counter = 0
+        for jahr in storage.schuljahre{
+            if jahr.jahr == storage.activeschuljahr{
+                var counter2 = 0
+                for fach in storage.schuljahre[counter].fächer{
+                    if fach.name == storage.activefach{
+                        var counter3 = 0
+                        for test in storage.schuljahre[counter].fächer[counter2].tests{
+                            switch test.testart {
+                            case .hü:
+                                self.hüvorhanden.append(storage.schuljahre[counter].fächer[counter2].tests[counter3])
+                            case .klassenarbeit:
+                                self.klassenarbeitenvorhanden.append(storage.schuljahre[counter].fächer[counter2].tests[counter3])
+                            case .epo:
+                                self.epovorhanden.append(storage.schuljahre[counter].fächer[counter2].tests[counter3])
+                            }
+                            counter3 += 1
+                        }
+                        
+                    }
+                    counter2 += 1
+                }
+            }
+            counter += 1
+        }
+        
+    }
     
     var body: some View {
         NavigationView{
             ScrollView{
                 
                 Divider()
-                HStack{
-                    Text("Klassenarbeiten").frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 20)
-                        .font(.title)
-                        .bold()
-                    
-                label: do {
+                
+                if klassenarbeitenvorhanden.count > 0{
                     HStack{
-                        Text("-,--")
-                            .font(.title2)
-                            .foregroundStyle(Color(cgColor: CGColor(red: 0.54902, green: 0.54902, blue: 0.54902, alpha: 1)))
-                        
-                        Text("Ø").font(.title2)
+                        Text("Klassenarbeiten").frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 20)
+                            .font(.title)
                             .bold()
-                    }.padding(.trailing, 20)
-                }
+                        
+                    label: do {
+                        HStack{
+                            Text("-,--")
+                                .font(.title2)
+                                .foregroundStyle(Color("midgray"))
+                            
+                            Text("Ø").font(.title2)
+                                .bold()
+                        }.padding(.trailing, 20)
+                    }
+                        
+                    }
+                        ForEach(klassenarbeitenvorhanden, id: \.self) { test in
+                            Notenkasten(note: String(test.note), testtyp: test.testart)
+                        }
                     
+                    Divider()
                 }
-                Group{
-                    Notenkasten(note: "1,0", testtyp: .klassenarbeit)
-                    Notenkasten(note: "1,25", testtyp: .klassenarbeit)
-                    Notenkasten(note: "1,75", testtyp: .klassenarbeit)
-                    Notenkasten(note: "1,0", testtyp: .klassenarbeit)
-                }
-                Divider()
-                HStack{
-                    Text("HÜ´S").frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 20)
-                        .font(.title)
-                        .bold()
-                    
-                label: do {
+                
+                if hüvorhanden.count > 0{
                     HStack{
-                        Text("-,--")
-                            .font(.title2)
-                            .foregroundStyle(Color(cgColor: CGColor(red: 0.54902, green: 0.54902, blue: 0.54902, alpha: 1)))
-                        
-                        Text("Ø").font(.title2)
+                        Text("HÜ´S").frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 20)
+                            .font(.title)
                             .bold()
-                    }.padding(.trailing, 20)
-                }
+                        
+                    label: do {
+                        HStack{
+                            Text("-,--")
+                                .font(.title2)
+                                .foregroundStyle(Color("midgray"))
+                            
+                            Text("Ø").font(.title2)
+                                .bold()
+                        }.padding(.trailing, 20)
+                    }
+                        
+                    }
+                        ForEach(hüvorhanden, id: \.self) { test in
+                            
+                            Notenkasten(note: String(test.note), testtyp: test.testart)
+                        }
                     
+                    Divider()
                 }
-                Group{
-                    Notenkasten(note: "4,0", testtyp: .hü)
-                    Notenkasten(note: "3,25", testtyp: .hü)
-                    Notenkasten(note: "2,75", testtyp: .hü)
-                    Notenkasten(note: "1,0", testtyp: .hü)
+                if epovorhanden.count > 0{
+                    HStack{
+                        Text("EPO'S").frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 20)
+                            .font(.title)
+                            .bold()
+                        
+                    label: do {
+                        HStack{
+                            Text("-,--")
+                                .font(.title2)
+                                .foregroundStyle(Color("midgray"))
+                            
+                            Text("Ø").font(.title2)
+                                .bold()
+                        }.padding(.trailing, 20)
+                    }
+                        
+                    }
+                    ForEach(epovorhanden, id: \.self) { test in
+                        Notenkasten(note: String(test.note), testtyp: test.testart)
+                    }
+                    Divider()
                 }
-                Divider()
+                
                 
                 Button("Löschen") {
                     
@@ -110,10 +175,10 @@ struct FachView: View {
         }
     }
 }
-/*
+
 struct FachView_Previews: PreviewProvider {
     static var previews: some View {
-        FachView()
+        Wrapper()
     }
 }
-*/
+
